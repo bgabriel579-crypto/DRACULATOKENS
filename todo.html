@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            background-color: #282A36;
+            color: #F8F8F2;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        input, button {
+            border: none;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+
+        input {
+            width: 200px;
+        }
+
+        button {
+            background: #6272A4;
+            color: #F8F8F2;
+            cursor: pointer;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #6272A4;
+        }
+
+        #stats {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>To-Do List Application</h1>
+    <input type="text" id="todo-input" placeholder="Add a new task...">
+    <button id="add-btn">Add</button>
+    <div id="filter">
+        <button id="show-all">Show All</button>
+        <button id="show-completed">Show Completed</button>
+        <button id="show-incomplete">Show Incomplete</button>
+    </div>
+    <ul id="todo-list"></ul>
+    <div id="stats"></div>
+
+    <script>
+        const todoInput = document.getElementById('todo-input');
+        const addBtn = document.getElementById('add-btn');
+        const todoList = document.getElementById('todo-list');
+        const statsDiv = document.getElementById('stats');
+        const filterAll = document.getElementById('show-all');
+        const filterCompleted = document.getElementById('show-completed');
+        const filterIncomplete = document.getElementById('show-incomplete');
+
+        let todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+        function renderTodos(filteredTodos) {
+            todoList.innerHTML = '';
+            filteredTodos.forEach((todo, index) => {
+                const li = document.createElement('li');
+                li.textContent = todo.text;
+                if (todo.completed) li.classList.add('completed');
+                li.addEventListener('click', () => toggleComplete(index));
+                todoList.appendChild(li);
+            });
+            updateStats();
+        }
+
+        function toggleComplete(index) {
+            todos[index].completed = !todos[index].completed;
+            saveTodos();
+            renderTodos(todos);
+        }
+
+        function saveTodos() {
+            localStorage.setItem('todos', JSON.stringify(todos));
+        }
+
+        function updateStats() {
+            const total = todos.length;
+            const completed = todos.filter(todo => todo.completed).length;
+            statsDiv.textContent = `Total: ${total}, Completed: ${completed}`;
+        }
+
+        addBtn.addEventListener('click', () => {
+            const todoText = todoInput.value;
+            if (todoText) {
+                todos.push({ text: todoText, completed: false });
+                saveTodos();
+                renderTodos(todos);
+                todoInput.value = '';
+            }
+        });
+
+        filterAll.addEventListener('click', () => renderTodos(todos));
+        filterCompleted.addEventListener('click', () => renderTodos(todos.filter(todo => todo.completed)));
+        filterIncomplete.addEventListener('click', () => renderTodos(todos.filter(todo => !todo.completed)));
+
+        renderTodos(todos);
+    </script>
+</body>
+</html>
